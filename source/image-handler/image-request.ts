@@ -19,6 +19,8 @@ import {
 import { SecretProvider } from "./secret-provider";
 import { ThumborMapper } from "./thumbor-mapper";
 
+const VALID_WIDTHS = [400, 767, 800, 1920]; // Fixed list valid width
+
 type OriginalImageInfo = Partial<{
   contentType: string;
   expires: string;
@@ -267,6 +269,16 @@ export class ImageRequest {
   public parseImageEdits(event: ImageHandlerEvent, requestType: RequestTypes): ImageEdits {
     if (requestType === RequestTypes.DEFAULT) {
       const decoded = this.decodeRequest(event);
+      // Check width request is valid
+      let width = decoded?.edits?.resize?.width;
+      if(VALID_WIDTHS.indexOf(width) === -1) decoded.edits.resize.width = this.findClosestWidth(width); // Default to closest valid width
+      // if(VALID_WIDTHS.indexOf(width) === -1) decoded.edits.resize.width = VALID_WIDTHS[0]; // Default to first valid width
+      // if(VALID_WIDTHS.indexOf(width) === -1) 
+      //   throw new ImageHandlerError(
+      //     StatusCodes.BAD_REQUEST,
+      //     "ImageEdits::WidthNotValid",
+      //     "The width you provided is not valid. Please check the width you specified in your request."
+      // );
       return decoded.edits;
     } else if (requestType === RequestTypes.THUMBOR) {
       const thumborMapping = new ThumborMapper();
@@ -545,5 +557,16 @@ export class ImageRequest {
         );
       }
     }
+  }
+
+  /**
+   * Find the closest width from the list of valid widths.
+   * @param requestedWidth The requested width.
+   * @returns The closest width.
+   */
+  private findClosestWidth(requestedWidth: number): number {
+    return VALID_WIDTHS.reduce((prev, curr) => {
+      return Math.abs(curr - requestedWidth) < Math.abs(prev - requestedWidth) ? curr : prev;
+    });
   }
 }
