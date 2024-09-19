@@ -46,7 +46,7 @@ export class ServerlessImageHandlerStack extends Stack {
       description:
         "Would you like to deploy a demo UI to explore the features and capabilities of this solution? This will create an additional Amazon S3 bucket and Amazon CloudFront distribution in your account.",
       allowedValues: ["Yes", "No"],
-      default: "Yes",
+      default: "No",
     });
 
     const logRetentionPeriodParameter = new CfnParameter(this, "LogRetentionPeriodParameter", {
@@ -72,7 +72,7 @@ export class ServerlessImageHandlerStack extends Stack {
         "1827",
         "3653",
       ],
-      default: "180",
+      default: "1",
     });
 
     const autoWebPParameter = new CfnParameter(this, "AutoWebPParameter", {
